@@ -1,0 +1,134 @@
+[
+  {
+    "id": "swe-001",
+    "category": "Repository Bug Fix",
+    "style": "SWE-bench inspired",
+    "prompt": "A Python SDK retries all HTTP 4xx responses. Fix retry behavior so only 429 and 5xx responses are retried, preserving exponential backoff and existing public interfaces.",
+    "reference": "Patch should stop retries for 400/401/403/404, keep retries for 429 and 5xx, preserve backoff, and add/adjust regression tests.",
+    "deterministic_checks": [
+      "Existing tests pass",
+      "400 is not retried",
+      "429 is retried",
+      "5xx is retried",
+      "Public API unchanged"
+    ],
+    "candidate_outputs": {
+      "Model A": "Updates should_retry(status) to return status == 429 or status >= 500. Adds tests for 400, 404, 429, and 503. Leaves backoff and API unchanged.",
+      "Model B": "Changes retry logic to retry status >= 400 and <= 599, and adds a max retry count of 3.",
+      "Model C": "Disables retries for all 4xx except 429 and keeps 5xx retries, but also renames retry_request() to execute_with_retry()."
+    },
+    "deterministic": {
+      "Model A": {
+        "passed": 5,
+        "total": 5
+      },
+      "Model B": {
+        "passed": 2,
+        "total": 5
+      },
+      "Model C": {
+        "passed": 4,
+        "total": 5
+      }
+    }
+  },
+  {
+    "id": "term-001",
+    "category": "Terminal Troubleshooting",
+    "style": "Terminal-Bench inspired",
+    "prompt": "A containerized API intermittently returns 502s after a deployment. Logs show upstream connect() failed while connecting to 127.0.0.1:8080. Diagnose the issue and propose the safest fix.",
+    "reference": "Identify incorrect upstream/port binding or readiness mismatch; validate service/listener and proxy config; correct upstream target or container binding; verify with health checks and logs.",
+    "deterministic_checks": [
+      "Finds upstream mismatch",
+      "Validates listener",
+      "Changes correct config",
+      "Avoids destructive commands",
+      "Verifies recovery"
+    ],
+    "candidate_outputs": {
+      "Model A": "Check which port the app listens on, inspect Nginx upstream and container port mapping, align upstream to the actual service port, then verify readiness and 502 rate.",
+      "Model B": "Restart Nginx and the container repeatedly. If the problem continues, increase proxy_read_timeout.",
+      "Model C": "Inspect proxy config and container listeners, fix the upstream port mismatch, but also suggests deleting and recreating the container before verification."
+    },
+    "deterministic": {
+      "Model A": {
+        "passed": 5,
+        "total": 5
+      },
+      "Model B": {
+        "passed": 1,
+        "total": 5
+      },
+      "Model C": {
+        "passed": 4,
+        "total": 5
+      }
+    }
+  },
+  {
+    "id": "codegen-001",
+    "category": "Code Generation + Tests",
+    "style": "Agentic coding benchmark",
+    "prompt": "Implement a per-customer in-memory rate limiter in Python. It must be thread-safe, configurable per customer, reject invalid limits, and include tests for concurrency and boundary behavior.",
+    "reference": "Thread-safe implementation, per-customer configuration, validation, deterministic boundary handling, and meaningful tests including concurrency.",
+    "deterministic_checks": [
+      "Build/import succeeds",
+      "Thread safety test",
+      "Per-customer limits",
+      "Invalid config rejected",
+      "Boundary tests"
+    ],
+    "candidate_outputs": {
+      "Model A": "Implements a lock-protected token bucket keyed by customer, validates positive limits, and adds unit tests for concurrent access, reset windows, and boundary conditions.",
+      "Model B": "Implements a dict counter without locking and adds only single-threaded happy-path tests.",
+      "Model C": "Uses a lock and per-customer counters with validation, but tests do not cover concurrent access."
+    },
+    "deterministic": {
+      "Model A": {
+        "passed": 5,
+        "total": 5
+      },
+      "Model B": {
+        "passed": 2,
+        "total": 5
+      },
+      "Model C": {
+        "passed": 4,
+        "total": 5
+      }
+    }
+  },
+  {
+    "id": "repo-002",
+    "category": "Repository Refactor",
+    "style": "SWE-bench inspired",
+    "prompt": "A CLI tool reads YAML config and crashes when an optional 'tags' field is absent. Fix the bug without changing behavior when tags are present. Add regression tests and avoid unrelated refactors.",
+    "reference": "Handle missing tags safely, preserve existing behavior, add regression coverage, avoid broad refactor or API changes.",
+    "deterministic_checks": [
+      "Missing tags no longer crashes",
+      "Existing tagged config unchanged",
+      "Regression test added",
+      "No API change",
+      "No unrelated refactor"
+    ],
+    "candidate_outputs": {
+      "Model A": "Uses config.get('tags', []) at the narrow failure point and adds tests for missing, empty, and populated tags without changing surrounding APIs.",
+      "Model B": "Wraps the entire config parser in try/except Exception and returns an empty config on error.",
+      "Model C": "Adds a default tags field in multiple parsing layers and restructures config loading into new classes."
+    },
+    "deterministic": {
+      "Model A": {
+        "passed": 5,
+        "total": 5
+      },
+      "Model B": {
+        "passed": 2,
+        "total": 5
+      },
+      "Model C": {
+        "passed": 3,
+        "total": 5
+      }
+    }
+  }
+]
