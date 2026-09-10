@@ -170,7 +170,7 @@ with tabs[0]:
 
 with tabs[1]:
     st.markdown("### Task and Claude judge trace")
-    if "v4_results" not in st.session_state:
+    if "benchmark_results" not in st.session_state:
         st.info("Run the benchmark first.")
     else:
         df = st.session_state["benchmark_results"]
